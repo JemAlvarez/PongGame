@@ -1,15 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+using UnityEngine.SceneManagement;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI aiScoreText;
-    [SerializeField] TextMeshProUGUI playerScoreText;
     [SerializeField] int aiScore = 0;
     [SerializeField] int playerScore = 0;
-    bool playerWins = false;
+    [SerializeField] int maxScore = 10;
+    public bool playerWins = false;
+
+    private void Awake()
+    {
+        SetUpSingleton();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -20,7 +24,6 @@ public class ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        DisplayScore();
         GameOver();
     }
 
@@ -42,7 +45,7 @@ public class ScoreManager : MonoBehaviour
         aiScore = 0;
     }
 
-    public  int GetScore(string player)
+    public  int GetScore(string player = "")
     {
         if (player == "ai")
         {
@@ -52,23 +55,35 @@ public class ScoreManager : MonoBehaviour
         return playerScore;
     }
 
-    void DisplayScore()
-    {
-        aiScoreText.text = aiScore.ToString();
-        playerScoreText.text = playerScore.ToString();
-    }
-
     void GameOver()
     {
-        if (aiScore >= 10)
+        if (SceneManager.GetActiveScene().name == "Game")
         {
-            playerWins = false;
-            FindObjectOfType<SceneLoader>().LoadEndScreen();
-        }
-        else if (playerScore >= 10)
-        {
-            playerWins = true;
-            FindObjectOfType<SceneLoader>().LoadEndScreen();
+            if (aiScore >= maxScore)
+            {
+                playerWins = false;
+                FindObjectOfType<SceneLoader>().LoadEndScreen();
+            }
+            else if (playerScore >= maxScore)
+            {
+                playerWins = true;
+                FindObjectOfType<SceneLoader>().LoadEndScreen();
+            }
         }
     }
+
+    private void SetUpSingleton()
+    {
+        int numberofSessions = FindObjectsOfType<ScoreManager>().Length;
+        if (numberofSessions > 1)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+    }
+
+
 }
